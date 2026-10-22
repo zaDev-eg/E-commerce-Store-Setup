@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-commerce Store Setup — Shopify &amp; WooCommerce</title>
+<style>
+:root{
+  --spruce:#16382e;        /* deep spruce */
+  --spruce-2:#1f4a3c;
+  --leaf:#3fa66b;          /* fresh leaf green */
+  --leaf-soft:#bfe3cd;
+  --gold:#f2a944;          /* conversion gold */
+  --gold-soft:#fce3bd;
+  --ink:#20302a;
+  --ink-soft:#5f7268;
+  --paper:#f5f8f4;         /* warm paper green */
+  --white:#ffffff;
+  --woo:#7b5ea7;           /* wooCommerce purple hint */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+  background:var(--paper);color:var(--ink);line-height:1.65;
+}
+
+#scrollbar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--leaf),var(--gold));width:0;z-index:200}
+
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 6vw;background:rgba(22,56,46,.93);backdrop-filter:blur(8px);
+  transition:box-shadow .3s;
+}
+header.scrolled{box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.logo{color:var(--white);font-weight:800;font-size:19px}
+.logo span{color:var(--gold)}
+nav.top a{color:#b9d2c5;text-decoration:none;margin-left:24px;font-size:14px;transition:color .25s;position:relative}
+nav.top a::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:2px;background:var(--gold);transition:width .3s}
+nav.top a:hover{color:var(--gold-soft)}
+nav.top a:hover::after{width:100%}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(50px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-60px);transition:opacity .8s ease,transform .8s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(60px);transition:opacity .8s ease,transform .8s ease}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+.reveal-scale{opacity:0;transform:scale(.85);transition:opacity .8s ease,transform .8s ease}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+.d1{transition-delay:.1s}.d2{transition-delay:.25s}.d3{transition-delay:.4s}.d4{transition-delay:.55s}.d5{transition-delay:.7s}
+
+section{padding:105px 8vw;max-width:1150px;margin:0 auto}
+section.wide{max-width:none;padding:105px 0}
+section.wide .inner{max-width:1150px;margin:0 auto;padding:0 8vw}
+
+.kicker{display:inline-block;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--leaf);margin-bottom:14px;font-weight:700}
+h2{font-size:clamp(29px,4vw,46px);line-height:1.15;font-weight:750;color:var(--spruce);margin-bottom:20px}
+h2 em{font-style:normal;color:var(--gold)}
+p.lead{font-size:clamp(16px,1.5vw,19px);color:var(--ink-soft);max-width:720px}
+
+/* hero */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+  position:relative;overflow:hidden;padding:0 8vw;
+  background:linear-gradient(155deg,#112b23 0%,#16382e 50%,#1f4a3c 100%);color:var(--white);
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 82% 18%,rgba(242,169,68,.24),transparent 45%),
+             radial-gradient(circle at 12% 85%,rgba(63,166,107,.3),transparent 45%);
+}
+/* storefront awning */
+.awning{position:absolute;top:0;left:0;right:0;height:56px;display:flex;z-index:1}
+.awning i{flex:1}
+.awning i:nth-child(odd){background:var(--leaf)}
+.awning i:nth-child(even){background:var(--white)}
+.awning{clip-path:polygon(0 0,100% 0,100% 55%,95% 100%,90% 55%,85% 100%,80% 55%,75% 100%,70% 55%,65% 100%,60% 55%,55% 100%,50% 55%,45% 100%,40% 55%,35% 100%,30% 55%,25% 100%,20% 55%,15% 100%,10% 55%,5% 100%,0 55%)}
+/* floating cart */
+.floatcart{position:absolute;right:8vw;top:30%;font-size:66px;animation:cartfloat 5s ease-in-out infinite;filter:drop-shadow(0 12px 18px rgba(0,0,0,.35))}
+@keyframes cartfloat{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-18px) rotate(4deg)}}
+.cartbubble{
+  position:absolute;right:calc(8vw - 10px);top:calc(30% - 34px);background:var(--gold);color:var(--spruce);
+  font-size:13px;font-weight:800;padding:6px 14px;border-radius:20px;box-shadow:0 6px 16px rgba(242,169,68,.5);
+  animation:cartfloat 5s ease-in-out infinite;
+}
+.hero h1{font-size:clamp(38px,6vw,72px);font-weight:800;line-height:1.1;position:relative}
+.hero h1 .zero{background:linear-gradient(90deg,var(--leaf-soft),var(--leaf));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero h1 .store{background:linear-gradient(90deg,var(--gold-soft),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:clamp(16px,2vw,21px);color:#b9d2c5;margin-top:20px;max-width:620px;position:relative}
+.hero .meta{display:flex;gap:22px;margin-top:32px;flex-wrap:wrap;position:relative}
+.hero .meta div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:9px 20px;border-radius:30px;font-size:14px}
+.hero .btn{
+  display:inline-block;margin-top:36px;padding:15px 44px;background:var(--gold);color:var(--spruce);
+  text-decoration:none;font-weight:800;letter-spacing:1px;border-radius:40px;transition:all .3s;position:relative;
+}
+.hero .btn:hover{background:var(--leaf);color:#fff;transform:translateY(-3px)}
+.hero .anim{opacity:0;animation:heroRise .9s ease forwards}
+@keyframes heroRise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);color:#7da190;font-size:12px;letter-spacing:3px;text-transform:uppercase;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,12px)}}
+
+/* cards */
+.grid{display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:40px}
+.card{
+  background:var(--white);border-radius:18px;padding:30px 28px;
+  box-shadow:0 8px 28px rgba(22,56,46,.09);transition:transform .35s ease, box-shadow .35s ease;
+}
+.card:hover{transform:translateY(-7px);box-shadow:0 16px 40px rgba(22,56,46,.16)}
+.card .icon{font-size:36px;margin-bottom:12px}
+.card h3{font-size:18.5px;color:var(--spruce);margin-bottom:8px}
+.card p{font-size:15px;color:var(--ink-soft)}
+.card.l{border-top:4px solid var(--leaf)}
+.card.gold{border-top:4px solid var(--gold)}
+.card.f{border-top:4px solid var(--spruce)}
+.card.w{border-top:4px solid var(--woo)}
+
+/* dark band */
+.band{background:var(--spruce);color:var(--white)}
+.band h2{color:var(--white)}
+.band p.lead{color:#b9d2c5}
+.band .card{background:var(--spruce-2);border-top:none;border-bottom:4px solid var(--leaf)}
+.band .card h3{color:var(--white)}
+.band .card p{color:#b9d2c5}
+.band .card.gold{border-bottom-color:var(--gold)}
+
+/* stats */
+.stats{display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:40px}
+.stat{background:var(--white);border-radius:18px;padding:30px 22px;text-align:center;box-shadow:0 8px 28px rgba(22,56,46,.09);border-bottom:4px solid var(--leaf)}
+.stat.gold{border-bottom-color:var(--gold)}
+.stat .num{font-size:clamp(38px,4.5vw,56px);font-weight:800;color:var(--leaf)}
+.stat.gold .num{color:var(--gold)}
+.stat .lbl{font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-soft);margin-top:6px}
+.band .stat{background:var(--spruce-2)}
+.band .stat .lbl{color:#7da190}
+
+/* platform vs */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:stretch;margin-top:44px}
+@media(max-width:700px){.vs{grid-template-columns:1fr}.vsbadge{margin:0 auto}}
+.plat{background:var(--white);border-radius:20px;padding:32px 30px;box-shadow:0 10px 30px rgba(22,56,46,.1)}
+.plat.shop{border-top:6px solid var(--leaf)}
+.plat.woo{border-top:6px solid var(--woo)}
+.plat h3{font-size:22px;margin-bottom:4px}
+.plat.shop h3{color:var(--leaf)}.plat.woo h3{color:var(--woo)}
+.plat .tag{font-size:13px;color:var(--ink-soft);margin-bottom:16px;display:block}
+.plat ul{list-style:none}
+.plat li{padding:8px 0 8px 28px;position:relative;font-size:14.5px;color:var(--ink-soft);border-bottom:1px dashed rgba(0,0,0,.06)}
+.plat li:last-child{border-bottom:none}
+.plat li::before{content:'✓';position:absolute;left:0;font-weight:800}
+.plat.shop li::before{color:var(--leaf)}
+.plat.woo li::before{color:var(--woo)}
+.vsbadge{
+  align-self:center;background:var(--gold);color:var(--spruce);font-weight:800;font-size:15px;
+  width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 22px rgba(242,169,68,.45);
+}
+.verdict{
+  margin-top:26px;background:var(--gold-soft);border:2px solid var(--gold);border-radius:16px;
+  padding:22px 26px;font-size:15.5px;color:var(--ink);text-align:center;
+}
+.verdict b{color:var(--spruce)}
+
+/* roadmap steps */
+.road{position:relative;margin-top:50px;padding-left:36px}
+.road::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:3px;background:linear-gradient(var(--leaf),var(--gold));border-radius:3px}
+.rstep{position:relative;padding-bottom:40px}
+.rstep:last-child{padding-bottom:0}
+.rstep::before{
+  content:'';position:absolute;left:-33px;top:4px;width:17px;height:17px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 0 5px rgba(242,169,68,.22);
+}
+.rstep:nth-child(odd)::before{background:var(--leaf);box-shadow:0 0 0 5px rgba(63,166,107,.22)}
+.rstep .rt{font-size:13px;font-weight:800;letter-spacing:1.5px;color:var(--leaf);text-transform:uppercase}
+.rstep h3{font-size:19px;color:var(--spruce);margin:3px 0 6px}
+.rstep p{font-size:15px;color:var(--ink-soft);max-width:640px}
+.rstep .chip{display:inline-block;margin-top:10px;margin-right:8px;background:var(--white);border:1.5px solid var(--leaf-soft);color:var(--spruce);font-size:12.5px;font-weight:700;padding:4px 14px;border-radius:16px}
+
+/* ---- product page mockup ---- */
+.mockwrap{display:flex;gap:44px;align-items:flex-start;flex-wrap:wrap;margin-top:44px}
+.pd{
+  flex:1;min-width:300px;max-width:470px;background:var(--white);border-radius:18px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(22,56,46,.22);margin:0 auto;border:1px solid #e2ece5;
+}
+.pd .pimg{
+  height:210px;background:linear-gradient(135deg,var(--leaf-soft),#8fd0ab);
+  display:flex;align-items:center;justify-content:center;font-size:72px;position:relative;
+}
+.pd .sale{position:absolute;top:14px;left:14px;background:var(--gold);color:var(--spruce);font-size:12.5px;font-weight:800;padding:6px 14px;border-radius:16px;box-shadow:0 4px 12px rgba(242,169,68,.5)}
+.pd .wish{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.pd .pbody{padding:24px}
+.pd .ptitle{font-size:19px;font-weight:800;color:var(--spruce)}
+.pd .pstars{color:var(--gold);font-size:14px;margin:6px 0}
+.pd .pstars span{color:var(--ink-soft);font-size:13px}
+.pd .pprice{display:flex;align-items:baseline;gap:12px;margin:8px 0 14px}
+.pd .pprice .now{font-size:26px;font-weight:800;color:var(--spruce)}
+.pd .pprice .was{font-size:16px;color:var(--ink-soft);text-decoration:line-through}
+.pd .pprice .save{font-size:12.5px;font-weight:800;color:var(--leaf);background:var(--leaf-soft);padding:3px 12px;border-radius:14px}
+.pd .variants{display:flex;gap:8px;margin-bottom:16px}
+.pd .v{width:34px;height:34px;border-radius:10px;border:2px solid #e0e8e3;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:border-color .2s}
+.pd .v.on{border-color:var(--spruce)}
+.pd .v:hover{border-color:var(--leaf)}
+.pd .add{
+  display:block;text-align:center;background:var(--gold);color:var(--spruce);font-weight:800;font-size:15.5px;
+  padding:15px;border-radius:14px;box-shadow:0 8px 20px rgba(242,169,68,.4);transition:transform .2s;
+}
+.pd .add:hover{transform:scale(1.02)}
+.pd .trust{display:flex;justify-content:space-around;margin-top:16px;padding-top:14px;border-top:1px solid #eef3f0;font-size:12px;color:var(--ink-soft)}
+.pd .trust b{display:block;color:var(--spruce);font-size:13px}
+
+/* anatomy cards */
+.anatomy{flex:1;min-width:280px;display:flex;flex-direction:column;gap:14px}
+.ana{display:flex;gap:14px;background:var(--white);border-radius:14px;padding:16px 20px;box-shadow:0 6px 20px rgba(22,56,46,.08);border-left:4px solid var(--leaf);transition:transform .3s}
+.ana:hover{transform:translateX(6px)}
+.ana:nth-child(2){border-left-color:var(--gold)}
+.ana:nth-child(3){border-left-color:var(--spruce)}
+.ana:nth-child(4){border-left-color:var(--leaf)}
+.ana:nth-child(5){border-left-color:var(--gold)}
+.ana .n{min-width:30px;height:30px;border-radius:50%;background:var(--leaf);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.ana:nth-child(2) .n{background:var(--gold);color:var(--spruce)}
+.ana:nth-child(3) .n{background:var(--spruce)}
+.ana h3{font-size:15.5px;color:var(--spruce)}
+.ana p{font-size:13.5px;color:var(--ink-soft)}
+
+/* checklist */
+.check{display:flex;flex-direction:column;gap:14px;margin-top:36px}
+.check li{list-style:none;background:var(--white);border-radius:14px;padding:16px 20px 16px 56px;position:relative;font-size:15.5px;box-shadow:0 6px 20px rgba(22,56,46,.07);color:var(--ink-soft)}
+.check li::before{content:'✓';position:absolute;left:16px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;background:var(--leaf);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.check li strong{color:var(--spruce)}
+
+/* CTA */
+.cta{
+  background:linear-gradient(120deg,var(--spruce),var(--spruce-2));border-radius:24px;
+  padding:64px 8vw;text-align:center;color:var(--white);position:relative;overflow:hidden;
+}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 85% 15%,rgba(242,169,68,.25),transparent 45%)}
+.cta h2{color:var(--white);position:relative}
+.cta h2 em{color:var(--gold-soft)}
+.cta .lead{color:#b9d2c5;position:relative}
+.cta .btn{display:inline-block;margin-top:28px;padding:15px 48px;background:var(--gold);color:var(--spruce);text-decoration:none;font-weight:800;letter-spacing:1px;border-radius:40px;transition:transform .3s;position:relative}
+.cta .btn:hover{transform:scale(1.06)}
+.cta .cinfo{margin-top:24px;font-size:15px;color:#b9d2c5;position:relative}
+
+footer{background:var(--spruce);color:#7da190;text-align:center;padding:26px;font-size:13px}
+
+@media (max-width:640px){nav.top{display:none}section{padding:80px 7vw}.floatcart,.cartbubble{display:none}.awning i:nth-child(n+9){display:none}}
+</style>
+</head>
+<body>
+
+<div id="scrollbar"></div>
+
+<header id="header">
+  <div class="logo">🛒 [STORE<span>·</span>BUILDER]</div>
+  <nav class="top">
+    <a href="#why">Why Now</a><a href="#platform">Shopify vs Woo</a><a href="#roadmap">Roadmap</a>
+    <a href="#anatomy">Store Anatomy</a><a href="#launch">Launch</a><a href="#cta">Hire Me</a>
+  </nav>
+</header>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="awning"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="floatcart">🛒</div>
+  <div class="cartbubble">+1 sale! 🎉</div>
+  <span class="kicker anim" style="animation-delay:.2s;color:var(--gold-soft)">E-commerce Store Setup</span>
+  <h1 class="anim" style="animation-delay:.4s"><span class="zero">From zero</span><br><span class="store">to a selling store.</span></h1>
+  <p class="anim" style="animation-delay:.6s">Complete Shopify &amp; WooCommerce setup and customization — designed, configured, and optimized to convert from day one.</p>
+  <div class="meta anim" style="animation-delay:.75s">
+    <div>🛍️ Shopify</div><div>🔌 WooCommerce</div><div>⚡ Conversion-focused</div>
+  </div>
+  <a href="#why" class="btn anim" style="animation-delay:.9s">Build My Store ↓</a>
+  <div class="scroll-hint">Scroll</div>
+</div>
+
+<!-- ============ WHY ============ -->
+<section id="why">
+  <span class="kicker reveal">Why E-commerce Now</span>
+  <h2 class="reveal d1">Your customers are <em>already shopping online</em></h2>
+  <div class="stats">
+    <div class="stat reveal d1"><div class="num" data-target="2.7" data-prefix="$" data-suffix="T" data-dec="1">0</div><div class="lbl">Global e-commerce sales</div></div>
+    <div class="stat gold reveal d2"><div class="num" data-target="63" data-suffix="%">0</div><div class="lbl">Of shopping journeys start online</div></div>
+    <div class="stat reveal d3"><div class="num" data-target="2.77" data-suffix="B" data-dec="2">0</div><div class="lbl">Online shoppers worldwide</div></div>
+    <div class="stat gold reveal d4"><div class="num" data-target="24" data-suffix="/7">0</div><div class="lbl">Your store, always open</div></div>
+  </div>
+  <p class="lead reveal d5" style="margin-top:30px">You don't need a tech team or a six-figure budget. With the right platform and setup, a polished store can be live in weeks — selling while you sleep.</p>
+</section>
+
+<!-- ============ PLATFORM VS ============ -->
+<section class="wide band" id="platform">
+  <div class="inner">
+    <span class="kicker reveal" style="color:var(--gold-soft)">Choose Your Platform</span>
+    <h2 class="reveal d1">Shopify <em>vs</em> WooCommerce</h2>
+    <div class="vs">
+      <div class="plat shop reveal-left d2">
+        <h3>🛍️ Shopify</h3>
+        <span class="tag">Hosted · all-in-one · fastest to launch</span>
+        <ul>
+          <li>Setup in days — hosting, security &amp; updates handled</li>
+          <li>Beautiful themes + huge app ecosystem</li>
+          <li>Built-in payments, shipping &amp; taxes</li>
+          <li>24/7 support, scales with your growth</li>
+          <li>Best for: beginners &amp; fast launches</li>
+        </ul>
+      </div>
+      <div class="vsbadge">VS</div>
+      <div class="plat woo reveal-right d3">
+        <h3>🔌 WooCommerce</h3>
+        <span class="tag">Self-hosted · WordPress · total control</span>
+        <ul>
+          <li>Free core plugin — pay only for hosting</li>
+          <li>Full ownership: data, design, code</li>
+          <li>Infinite customization via WordPress</li>
+          <li>No platform fees or revenue share</li>
+          <li>Best for: content-heavy &amp; custom stores</li>
+        </ul>
+      </div>
+    </div>
+    <div class="verdict reveal d4">💡 <b>My recommendation:</b> [pick one and justify — e.g., "Shopify for speed and simplicity, WooCommerce when content SEO is central to your strategy. I'll help you choose in a free consult."]</div>
+  </div>
+</section>
+
+<!-- ============ ROADMAP ============ -->
+<section id="roadmap">
+  <span class="kicker reveal">The Build Roadmap</span>
+  <h2 class="reveal d1">Five phases to <em>launch day</em></h2>
+  <div class="road">
+    <div class="rstep reveal d1"><span class="rt">Phase 01</span><h3>🧱 Foundations</h3><p>Platform setup, domain, hosting, store settings, taxes, shipping zones.</p><span class="chip">Domain</span><span class="chip">Settings</span><span class="chip">Shipping</span></div>
+    <div class="rstep reveal d2"><span class="rt">Phase 02</span><h3>🎨 Design &amp; Branding</h3><p>Theme selection and customization — logo, colors, fonts, and a layout that guides visitors to buy.</p><span class="chip">Theme</span><span class="chip">Branding</span><span class="chip">UX</span></div>
+    <div class="rstep reveal d3"><span class="rt">Phase 03</span><h3>📦 Products &amp; Content</h3><p>Product pages with persuasive copy, photography guidance, collections, and policies.</p><span class="chip">Listings</span><span class="chip">Collections</span><span class="chip">Pages</span></div>
+    <div class="rstep reveal d4"><span class="rt">Phase 04</span><h3>💳 Payments &amp; Essentials</h3><p>Payment gateways, checkout optimization, email capture, apps/analytics, legal pages.</p><span class="chip">Checkout</span><span class="chip">Analytics</span><span class="chip">Apps</span></div>
+    <div class="rstep reveal d5"><span class="rt">Phase 05</span><h3>🚀 Test &amp; Launch</h3><p>End-to-end test orders, speed checks, mobile review — then flip the switch and announce.</p><span class="chip">Test orders</span><span class="chip">Speed</span><span class="chip">Go live</span></div>
+  </div>
+</section>
+
+<!-- ============ STORE ANATOMY ============ -->
+<section class="wide band" id="anatomy">
+  <div class="inner">
+    <span class="kicker reveal" style="color:var(--gold-soft)">Conversion Anatomy</span>
+    <h2 class="reveal d1">A product page that <em>sells</em></h2>
+    <div class="mockwrap">
+      <div class="pd reveal-left d2">
+        <div class="pimg">
+          <span class="sale">−30% LAUNCH</span>
+          <span class="wish">🤍</span>
+          🎧
+        </div>
+        <div class="pbody">
+          <div class="ptitle">[Product Name] — Premium Wireless Headphones</div>
+          <div class="pstars">★★★★★ <span>4.8 (216 reviews)</span></div>
+          <div class="pprice"><span class="now">$69.99</span><span class="was">$99.99</span><span class="save">Save $30</span></div>
+          <div class="variants"><span class="v on">🖤</span><span class="v">🤍</span><span class="v">💙</span><span class="v">➕ more</span></div>
+          <span class="add">🛒 Add to Cart</span>
+          <div class="trust">
+            <div><b>🚚 Free shipping</b>over $50</div>
+            <div><b>↩️ 30-day returns</b>no questions</div>
+            <div><b>🔒 Secure checkout</b>SSL protected</div>
+          </div>
+        </div>
+      </div>
+      <div class="anatomy reveal-right d3">
+        <div class="ana"><span class="n">1</span><div><h3>Scroll-stopping visuals</h3><p>Clean photos on soft backgrounds, badges for offers, wishlist for returning visitors</p></div></div>
+        <div class="ana"><span class="n">2</span><div><h3>Benefit-led title &amp; reviews</h3><p>Product name + key benefit, star rating visible before the price</p></div></div>
+        <div class="ana"><span class="n">3</span><div><h3>Anchored pricing</h3><p>Compare-at price + savings chip makes the deal feel real</p></div></div>
+        <div class="ana"><span class="n">4</span><div><h3>Variant selection</h3><p>Color/size swatches — fewer choices, faster decisions</p></div></div>
+        <div class="ana"><span class="n">5</span><div><h3>One bold CTA + trust row</h3><p>Single Add-to-Cart, then shipping, returns &amp; security reassurance</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LAUNCH CHECKLIST ============ -->
+<section id="launch">
+  <span class="kicker reveal">Launch Day Ready</span>
+  <h2 class="reveal d1">The final <em>pre-flight check</em></h2>
+  <ul class="check">
+    <li class="reveal d1"><strong>Test orders on every payment method</strong> — including refunds and failed payments</li>
+    <li class="reveal d2"><strong>Mobile pass on real phones</strong> — 70%+ of shoppers buy from mobile</li>
+    <li class="reveal d3"><strong>Speed under 3 seconds</strong> — compressed images, minimal apps, fast theme</li>
+    <li class="reveal d4"><strong>Abandoned cart emails on</strong> — recover 5–15% of lost checkouts automatically</li>
+    <li class="reveal d5"><strong>Analytics &amp; pixels connected</strong> — you can't improve what you don't measure</li>
+  </ul>
+</section>
+
+<!-- ============ CTA ============ -->
+<section id="cta">
+  <div class="cta reveal-scale">
+    <span class="kicker" style="color:var(--gold-soft)">Open for Business</span>
+    <h2>Your store could be <em>selling this month</em></h2>
+    <p class="lead" style="margin:0 auto">Platform selection, full setup, custom design, and conversion optimization — done for you, launch-ready.</p>
+    <a href="mailto:[email]" class="btn">Start My Store 🛒</a>
+    <div class="cinfo">📧 [email] &nbsp;·&nbsp; 🌐 [portfolio] &nbsp;·&nbsp; 📞 [phone]</div>
+  </div>
+</section>
+
+<footer>© 2026 [Your Name] — E-commerce Store Setup Template</footer>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}
+  });
+},{threshold:0.15});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el=>io.observe(el));
+
+const counterIO = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el=e.target; counterIO.unobserve(el);
+    const target=parseFloat(el.dataset.target);
+    const prefix=el.dataset.prefix||'', suffix=el.dataset.suffix||'', dec=parseInt(el.dataset.dec||0);
+    const dur=1600, start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      const eased=1-Math.pow(1-p,3);
+      el.textContent=prefix+(target*eased).toFixed(dec)+suffix;
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+},{threshold:0.5});
+document.querySelectorAll('.num[data-target]').forEach(el=>counterIO.observe(el));
+
+const bar=document.getElementById('scrollbar'), header=document.getElementById('header');
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  header.classList.toggle('scrolled',h.scrollTop>40);
+});
+</script>
+</body>
+</html>
